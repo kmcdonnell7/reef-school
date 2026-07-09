@@ -29,8 +29,9 @@
     if (config.games) config._byId = {};
     (config.games || []).forEach((g) => (config._byId[g.id] = g));
 
-    // sync speak setting
+    // sync sound settings
     if (window.Speak) window.Speak.toggle(store.data.settings.speak);
+    if (window.SFX) window.SFX.toggle(store.data.settings.sound !== false);
 
     // ---- root scaffolding ----
     document.title = config.title;
@@ -45,6 +46,19 @@
       bubbles.appendChild(b);
     }
     document.body.appendChild(bubbles);
+
+    // light rays + sea floor decoration (pure CSS/SVG, behind content)
+    const rays = el("div", "rays");
+    document.body.appendChild(rays);
+    const floor = el("div", "seafloor");
+    floor.innerHTML =
+      "<svg viewBox='0 0 1200 140' preserveAspectRatio='none' xmlns='http://www.w3.org/2000/svg'>" +
+      "<path d='M0,90 Q150,40 300,80 T600,80 T900,75 T1200,85 L1200,140 L0,140 Z' fill='rgba(1,44,74,.55)'/>" +
+      "<path d='M0,110 Q200,70 400,105 T800,100 T1200,110 L1200,140 L0,140 Z' fill='rgba(1,30,52,.75)'/>" +
+      "</svg>" +
+      "<span class='weed' style='left:6%'>🌿</span><span class='weed' style='left:20%'>🪸</span>" +
+      "<span class='weed' style='left:78%'>🌿</span><span class='weed' style='left:90%'>🪸</span>";
+    document.body.appendChild(floor);
 
     const wrap = el("div", "wrap");
     const topbar = el("div", "topbar");
@@ -123,6 +137,9 @@
         store.addPoints(n);
         refreshScore();
         pointFly(ev, n);
+        if (window.SFX) window.SFX.point();
+        const chip = document.querySelector(".score-chip");
+        if (chip) { chip.classList.remove("bump"); void chip.offsetWidth; chip.classList.add("bump"); }
         const c = maybeUnlockCreature();
         if (c) ctx._newCreature = c;
       };
@@ -131,7 +148,9 @@
       ctx.feedback = (node, msg, ok) => {
         node.textContent = msg;
         node.className = "feedback " + (ok ? "good" : "bad");
+        if (window.SFX) { ok ? window.SFX.correct() : window.SFX.wrong(); }
       };
+      ctx.sfx = window.SFX || { correct(){}, wrong(){}, point(){}, win(){}, tap(){} };
       ctx.set = (child) => { root.innerHTML = ""; if (typeof child === "string") root.innerHTML = child; else root.appendChild(child); };
       ctx.finish = (opts) => finishGame(ctx, opts);
       ctx.toast = toast;
@@ -143,6 +162,7 @@
     function finishGame(ctx, opts) {
       opts = opts || {};
       confetti();
+      if (window.SFX) window.SFX.win();
       if (opts.gameId) store.recordPlay(opts.gameId, opts.score);
       const wrapC = el("div", "card reward");
       const emoji = ctx._newCreature || opts.emoji || "🌟";
@@ -179,11 +199,34 @@
     }
 
     // ---------- HUB ----------
+    function tileEl(tag, emoji, name, sub, onclick) {
+      const t = el("button", "tile tile-" + tag);
+      t.innerHTML = "<span class='badge'>" + emoji + "</span><span class='name'>" +
+        esc(name) + "</span>" + (sub ? "<span class='sub'>" + esc(sub) + "</span>" : "");
+      t.onclick = onclick;
+      return t;
+    }
+
     function goHome() {
       onBack = goHome;
       if (window.Speak) window.Speak.stop();
       root.innerHTML = "";
-      const groups = { reading: [], writing: [], spelling: [], math: [] };
+
+      // hero banner
+      const hero = el("div", "hero");
+      const owned = store.data.creatures.length;
+      const nextStars = (CREATURE_MILESTONES[owned] || (25 + owned * 8));
+      hero.innerHTML =
+        "<div class='hero-mascot'>" + (config.mascot || "🐠") + "</div>" +
+        "<div class='hero-info'><div class='hero-hi'>" + esc(config.greeting || "Ready to dive in?") + "</div>" +
+        (config.focus ? "<div class='hero-focus'>" + esc(config.focus) + "</div>" : "") +
+        "<div class='hero-stats'>" + config.pointEmoji + " " + store.data.points + " " + esc(config.pointName) +
+        " &nbsp;·&nbsp; ⭐ " + store.data.stars +
+        (owned < config.creatures.length ? " &nbsp;·&nbsp; next friend at ★" + nextStars : " &nbsp;·&nbsp; all friends! 🎉") +
+        "</div></div>";
+      root.appendChild(hero);
+
+      const groups = {};
       const order = ["reading", "writing", "spelling", "math"];
       const labels = { reading: "📖 Reading", writing: "✍️ Writing", spelling: "🔤 Spelling", math: "🔢 Math" };
       config.games.forEach((g) => (groups[g.tag] || (groups[g.tag] = [])).push(g));
@@ -192,30 +235,19 @@
         if (!groups[tag] || !groups[tag].length) return;
         root.appendChild(el("div", "section-label", labels[tag]));
         const tiles = el("div", "tiles");
-        groups[tag].forEach((g) => {
-          const t = el("button", "tile");
-          t.innerHTML = "<span class='emoji'>" + g.emoji + "</span><span class='name'>" +
-            esc(g.name) + "</span>" + (g.sub ? "<span class='sub'>" + esc(g.sub) + "</span>" : "") +
-            "<span class='tag " + g.tag + "'>" + g.tag + "</span>";
-          t.onclick = () => openGame(g.id);
-          tiles.appendChild(t);
-        });
+        groups[tag].forEach((g) => tiles.appendChild(tileEl(g.tag, g.emoji, g.name, g.sub, () => openGame(g.id))));
         root.appendChild(tiles);
       });
 
       // My Reef row
       root.appendChild(el("div", "section-label", "🏝️ My Reef"));
       const extra = el("div", "tiles");
-      const starTile = el("button", "tile");
-      starTile.innerHTML = "<span class='emoji'>⭐</span><span class='name'>Star Chart</span><span class='sub'>" + store.data.stars + " stars</span>";
-      starTile.onclick = showStars;
-      const grownTile = el("button", "tile");
-      grownTile.innerHTML = "<span class='emoji'>👪</span><span class='name'>Grown-Ups</span><span class='sub'>progress</span>";
-      grownTile.onclick = showGrown;
-      const speakTile = el("button", "tile");
+      extra.appendChild(tileEl("reef", "⭐", "Star Chart", store.data.stars + " stars", showStars));
+      extra.appendChild(tileEl("reef", "👪", "Grown-Ups", "progress", showGrown));
+      const speakTile = tileEl("reef", "🔊", "Read Aloud", "ON", null);
       const renderSpeak = () => {
-        speakTile.innerHTML = "<span class='emoji'>" + (store.data.settings.speak ? "🔊" : "🔇") +
-          "</span><span class='name'>Read Aloud</span><span class='sub'>" + (store.data.settings.speak ? "ON" : "OFF") + "</span>";
+        speakTile.querySelector(".badge").textContent = store.data.settings.speak ? "🔊" : "🔇";
+        speakTile.querySelector(".sub").textContent = store.data.settings.speak ? "ON" : "OFF";
       };
       renderSpeak();
       speakTile.onclick = () => {
@@ -225,7 +257,20 @@
         renderSpeak();
         if (on) window.Speak && window.Speak.say("Read aloud is on");
       };
-      extra.append(starTile, grownTile, speakTile);
+      const soundTile = tileEl("reef", "🎵", "Sound FX", "ON", null);
+      const renderSound = () => {
+        const on = store.data.settings.sound !== false;
+        soundTile.querySelector(".badge").textContent = on ? "🎵" : "🔕";
+        soundTile.querySelector(".sub").textContent = on ? "ON" : "OFF";
+      };
+      renderSound();
+      soundTile.onclick = () => {
+        const on = !(store.data.settings.sound !== false);
+        store.setSound(on);
+        if (window.SFX) { window.SFX.toggle(on); if (on) window.SFX.correct(); }
+        renderSound();
+      };
+      extra.append(speakTile, soundTile);
       root.appendChild(extra);
     }
 

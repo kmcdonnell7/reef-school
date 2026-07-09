@@ -27,6 +27,8 @@
         title: week.story.title, genre: null,
         paragraphs: week.story.lines, quiz: week.story.quiz,
       }) },
+    { id: "fill-gap", name: "Fill the Gap", emoji: "🎣", tag: "reading", sub: "Pick the word",
+      build: (ctx) => G.fillGap(ctx, { gameId: "fill-gap", emoji: "🎣", source: week.story.lines, words: week.words }) },
 
     // Writing
     { id: "sentence-builder", name: "Sentence Builder", emoji: "🧩", tag: "writing", sub: "Tap to build",
@@ -52,6 +54,8 @@
       build: (ctx) => G.mathFacts(ctx, { gameId: "bubble-pop", emoji: "🫧", mode: week.math.mode }) },
     { id: "number-line", name: "Number-Line Dive", emoji: "🐟", tag: "math", sub: "Count back",
       build: (ctx) => G.numberLine(ctx, { gameId: "number-line", emoji: "🐟" }) },
+    { id: "race-zero", name: "Race to Zero", emoji: "🏁", tag: "math", sub: "Dive to 0",
+      build: (ctx) => G.raceToZero(ctx, { gameId: "race-zero", emoji: "🏁" }) },
   ];
 
   window.Reef.start({
@@ -59,6 +63,9 @@
     playerKey: "tidepool",
     pointName: "pearls",
     pointEmoji: "🫧",
+    mascot: "🐠",
+    greeting: "Hi! Ready to splash?",
+    focus: "This week: Level " + week.level + " · " + week.mathFocus,
     creatures: ["🐠", "🦀", "🐢", "🐙", "🦐", "🐡", "🐬", "🐳", "🦑", "🦈"],
     games: games,
   });

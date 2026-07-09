@@ -15,7 +15,7 @@
       correct: 0,         // lifetime correct answers
       answered: 0,        // lifetime answered
       lastPlayed: null,
-      settings: { speak: true },
+      settings: { speak: true, sound: true },
     };
   };
 
@@ -69,6 +69,11 @@
 
   Store.prototype.setSpeak = function (on) {
     this.data.settings.speak = !!on;
+    this.save();
+  };
+
+  Store.prototype.setSound = function (on) {
+    this.data.settings.sound = !!on;
     this.save();
   };
 

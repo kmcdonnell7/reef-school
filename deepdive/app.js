@@ -21,6 +21,8 @@
         title: week.passage.title, genre: week.passage.genre,
         paragraphs: week.passage.text, quiz: week.passage.quiz,
       }) },
+    { id: "fill-gap", name: "Vocab in Context", emoji: "🎣", tag: "reading", sub: "Power word cloze",
+      build: (ctx) => G.fillGap(ctx, { gameId: "fill-gap", emoji: "🎣", source: week.passage.text, words: week.words.map((w) => w.w) }) },
 
     // Writing
     { id: "grammar-reef", name: "Grammar Reef", emoji: "✏️", tag: "writing", sub: "Fix it up",
@@ -48,6 +50,12 @@
       build: (ctx) => G.mathFacts(ctx, { gameId: "math-dive", emoji: "🌊", mode: week.math.mode }) },
     { id: "word-problems", name: "Word Problems", emoji: "🐠", tag: "math", sub: "Story math",
       build: (ctx) => G.wordProblems(ctx, { gameId: "word-problems", emoji: "🐠", bank: DATA.wordProblems }) },
+    { id: "factor-hunt", name: "Factor Hunt", emoji: "🔦", tag: "math", sub: "Missing factor",
+      build: (ctx) => G.factorHunt(ctx, { gameId: "factor-hunt", emoji: "🔦" }) },
+    { id: "skip-count", name: "Skip-Count", emoji: "🐾", tag: "math", sub: "Number patterns",
+      build: (ctx) => G.skipCount(ctx, { gameId: "skip-count", emoji: "🐾" }) },
+    { id: "fraction-match", name: "Fraction Match", emoji: "🥧", tag: "math", sub: "Name the fraction",
+      build: (ctx) => G.fractionMatch(ctx, { gameId: "fraction-match", emoji: "🥧" }) },
   ];
 
   window.Reef.start({
@@ -55,6 +63,9 @@
     playerKey: "deepdive",
     pointName: "gems",
     pointEmoji: "💎",
+    mascot: "🐬",
+    greeting: "Ready to dive deep?",
+    focus: "Week " + week.n + " · Level " + week.level + " · " + week.mathTopic,
     creatures: ["🐋", "🦭", "🪼", "🦞", "🦈", "🐊", "🦦", "🐧", "🦩", "🐢"],
     games: games,
   });

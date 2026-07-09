@@ -511,6 +511,98 @@
     numQuiz(ctx, { gameId: opts.gameId, emoji: opts.emoji, items: items, pointsEach: 3 });
   };
 
+  // Fill-the-Gap — cloze from real sentences, pick the right word
+  G.fillGap = function (ctx, opts) {
+    const BLANK = "_____";
+    const sents = [];
+    (opts.source || []).forEach((s) => {
+      String(s).replace(/([.!?])\s+/g, "$1").split("").forEach((x) => { if (x.trim()) sents.push(x.trim()); });
+    });
+    const words = opts.words.slice();
+    const usedSent = {};
+    const items = [];
+    for (const w of shuffle(words)) {
+      const re = new RegExp("\\b" + w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "\\b", "i");
+      const idx = sents.findIndex((s, k) => !usedSent[k] && re.test(s));
+      if (idx < 0) continue;
+      usedSent[idx] = true;
+      const sent = sents[idx];
+      const wrongs = sample(words.filter((x) => x.toLowerCase() !== w.toLowerCase()), 2);
+      if (wrongs.length < 2) continue;
+      const choices = shuffle([w, wrongs[0], wrongs[1]]);
+      items.push({ q: sent.replace(re, BLANK), choices: choices, a: choices.indexOf(w), _spoken: sent.replace(re, "blank") });
+      if (items.length >= (opts.count || 6)) break;
+    }
+    if (!items.length) { ctx.set(el("div", "card", "<h2>Fill-the-Gap</h2><p class='lead'>No sentences to fill this week — try another game!</p>")); return; }
+    mcqQuiz(ctx, {
+      gameId: opts.gameId, emoji: opts.emoji, pointsEach: 2, items: items, doneTitle: "Sentence solver! 📖",
+      header: (it) => { const b = el("button", "btn sun"); b.textContent = "🔊 Hear the sentence"; b.onclick = () => ctx.speak(it._spoken); return b; },
+    });
+  };
+
+  // Race to Zero — chained subtraction down to exactly 0
+  G.raceToZero = function (ctx, opts) {
+    const start = opts.start || (14 + rand(7));
+    const items = []; let cur = start;
+    while (cur > 0) {
+      const step = 1 + rand(Math.min(6, cur));
+      const nxt = cur - step;
+      const depth = cur;
+      items.push({ q: cur + " − " + step + " = ?", a: nxt, pre: (function () { const d = el("p", "lead"); d.textContent = "🐠 Dive to zero — you're at " + depth + "!"; return d; })() });
+      cur = nxt;
+    }
+    numQuiz(ctx, { gameId: opts.gameId, emoji: opts.emoji, items: items, pointsEach: 1 });
+  };
+
+  // Skip-Count — find the missing number in a skip sequence
+  G.skipCount = function (ctx, opts) {
+    const steps = [2, 3, 4, 5, 6, 8, 9, 10];
+    const items = [];
+    for (let k = 0; k < (opts.count || 6); k++) {
+      const st = pick(steps), start = st * (1 + rand(3));
+      const seq = []; for (let j = 0; j < 5; j++) seq.push(start + st * j);
+      const blankIdx = 1 + rand(4);
+      const shown = seq.map((v, idx) => (idx === blankIdx ? "?" : v)).join(", ");
+      items.push({ q: shown, a: seq[blankIdx], pre: (function () { const d = el("p", "lead"); d.textContent = "Skip-count by " + st + "s — find the missing number."; return d; })() });
+    }
+    numQuiz(ctx, { gameId: opts.gameId, emoji: opts.emoji, items: items, pointsEach: 2 });
+  };
+
+  // Factor Hunt — missing factor
+  G.factorHunt = function (ctx, opts) {
+    const items = [];
+    const hint = () => { const d = el("p", "lead"); d.textContent = "Find the missing factor."; return d; };
+    for (let k = 0; k < (opts.count || 8); k++) {
+      const a = 2 + rand(8), b = 2 + rand(8), p = a * b;
+      if (rand(2)) items.push({ q: a + " × ? = " + p, a: b, pre: hint() });
+      else items.push({ q: "? × " + b + " = " + p, a: a, pre: hint() });
+    }
+    numQuiz(ctx, { gameId: opts.gameId, emoji: opts.emoji, items: items, pointsEach: 2 });
+  };
+
+  // Fraction Match — identify the shaded fraction (visual)
+  function fracBar(n, d) {
+    const w = 280, h = 54, seg = w / d; let rects = "";
+    for (let i = 0; i < d; i++) rects += "<rect x='" + (i * seg + 1) + "' y='1' width='" + (seg - 4) + "' height='" + (h - 2) + "' rx='7' fill='" + (i < n ? "#468faf" : "#e6f2f7") + "' stroke='#2a6f97' stroke-width='2'/>";
+    return "<svg viewBox='0 0 " + w + " " + h + "' width='100%' style='max-width:300px'>" + rects + "</svg>";
+  }
+  G.fractionMatch = function (ctx, opts) {
+    const dens = [2, 3, 4, 5, 6, 8];
+    const items = [];
+    for (let k = 0; k < (opts.count || 6); k++) {
+      const d = pick(dens), n = 1 + rand(d - 1);
+      const set = [n + "/" + d];
+      let guard = 0;
+      while (set.length < 3 && guard++ < 40) { const dd = pick(dens), nn = 1 + rand(dd - 1); const s = nn + "/" + dd; if (!set.includes(s)) set.push(s); }
+      const choices = shuffle(set);
+      items.push({ q: "What fraction is shaded?", choices: choices, a: choices.indexOf(n + "/" + d), _svg: fracBar(n, d) });
+    }
+    mcqQuiz(ctx, {
+      gameId: opts.gameId, emoji: opts.emoji, pointsEach: 2, items: items, doneTitle: "Fraction finder! 🔢",
+      header: (it) => { const wv = el("div", "center"); wv.style.margin = "6px 0 12px"; wv.innerHTML = it._svg; return wv; },
+    });
+  };
+
   R.G = G;
   R.progressDots = progressDots;
   R.pickWeek = function (weeks, todayISO) {

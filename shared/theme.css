@@ -60,9 +60,25 @@ html, body {
   z-index: 1;
   max-width: 720px;
   margin: 0 auto;
-  padding: 18px 16px 48px;
+  padding: 18px 16px 130px;
   min-height: 100vh;
 }
+
+/* Light rays + sea floor (decorative, behind content) */
+.rays { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+.rays::before, .rays::after {
+  content: ""; position: absolute; top: -20%; width: 42%; height: 150%;
+  background: linear-gradient(rgba(255,255,255,.13), rgba(255,255,255,0));
+  filter: blur(8px);
+}
+.rays::before { left: 6%; transform: rotate(16deg); }
+.rays::after { left: 58%; transform: rotate(-13deg); }
+.seafloor { position: fixed; left: 0; right: 0; bottom: 0; height: 130px; z-index: 0; pointer-events: none; }
+.seafloor svg { position: absolute; bottom: 0; left: 0; width: 100%; height: 100%; }
+.seafloor .weed { position: absolute; bottom: 8px; font-size: 1.7rem; opacity: .9; }
+
+.score-chip.bump { animation: chipbump .32s ease; }
+@keyframes chipbump { 0% { transform: scale(1); } 40% { transform: scale(1.18); } 100% { transform: scale(1); } }
 
 /* Top bar */
 .topbar {
@@ -106,29 +122,48 @@ html, body {
 .btn.big { display: block; width: 100%; font-size: 1.3rem; padding: 20px; margin: 10px 0; }
 .btn[disabled] { opacity: .5; pointer-events: none; }
 
+/* Hub hero */
+.hero {
+  display: flex; align-items: center; gap: 14px;
+  background: linear-gradient(150deg, rgba(255,255,255,.97), rgba(233,246,251,.97));
+  border-radius: var(--radius); padding: 14px 16px;
+  box-shadow: var(--shadow); margin-bottom: 6px;
+}
+.hero-mascot { font-size: 3rem; flex: 0 0 auto; animation: bob 3s ease-in-out infinite; }
+@keyframes bob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+.hero-info { min-width: 0; }
+.hero-hi { font-weight: 800; font-size: 1.15rem; color: var(--deep); }
+.hero-focus { font-size: .85rem; color: var(--sea); font-weight: 700; margin-top: 2px; }
+.hero-stats { font-size: .82rem; color: var(--sea2); font-weight: 800; margin-top: 6px; }
+
 /* Hub tiles */
 .tiles { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
 .tile {
+  position: relative; overflow: hidden;
   cursor: pointer; border: none;
-  background: var(--white);
   border-radius: var(--radius);
-  padding: 18px 14px; text-align: center;
-  box-shadow: var(--shadow);
+  padding: 16px 12px 14px; text-align: center; color: #fff;
+  box-shadow: 0 6px 0 rgba(1,58,99,.22);
   font-family: var(--font);
-  transition: transform .06s;
+  transition: transform .06s, box-shadow .06s;
 }
-.tile:active { transform: scale(.97); }
-.tile .emoji { font-size: 2.6rem; display: block; line-height: 1.1; }
-.tile .name { display: block; font-weight: 800; font-size: 1.05rem; color: var(--ink); margin-top: 6px; line-height: 1.2; }
-.tile .sub { display: block; font-size: .8rem; color: var(--sea); margin-top: 3px; line-height: 1.15; }
-.tile .tag {
-  display: inline-block; margin-top: 8px; font-size: .7rem; font-weight: 800;
-  padding: 3px 9px; border-radius: 999px; color: var(--white);
+.tile::after { content: ""; position: absolute; inset: 0 0 auto 0; height: 42%; background: linear-gradient(rgba(255,255,255,.20), transparent); pointer-events: none; }
+.tile:active { transform: translateY(3px); box-shadow: 0 3px 0 rgba(1,58,99,.22); }
+.tile .badge {
+  display: flex; align-items: center; justify-content: center;
+  width: 58px; height: 58px; margin: 2px auto 8px;
+  border-radius: 50%; background: rgba(255,255,255,.92);
+  font-size: 1.9rem; box-shadow: inset 0 -3px 0 rgba(0,0,0,.06);
 }
-.tag.reading { background: var(--sea2); }
-.tag.writing { background: var(--coral2); }
-.tag.spelling { background: var(--grape); }
-.tag.math { background: var(--kelp); }
+.tile .name { display: block; font-weight: 800; font-size: 1rem; line-height: 1.15; text-shadow: 0 1px 0 rgba(0,0,0,.14); }
+.tile .sub { display: block; font-size: .75rem; margin-top: 3px; opacity: .95; line-height: 1.1; }
+.tile-reading  { background: linear-gradient(160deg, #5ab0d6, #2a6f97); }
+.tile-writing  { background: linear-gradient(160deg, #ff9770, #ff5f6d); }
+.tile-spelling { background: linear-gradient(160deg, #b57be6, #9d4edd); }
+.tile-math     { background: linear-gradient(160deg, #5fca9b, #2d8f66); }
+.tile-reef     { background: linear-gradient(160deg, #ffd879, #ffb703); color: var(--ink); }
+.tile-reef .name { text-shadow: none; }
+.tile-reef .sub { opacity: .8; }
 
 .section-label {
   color: var(--white); font-weight: 800; font-size: .95rem;
