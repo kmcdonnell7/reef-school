@@ -29,6 +29,11 @@
     if (config.games) config._byId = {};
     (config.games || []).forEach((g) => (config._byId[g.id] = g));
 
+    // Week selection (session-only; defaults to the date-picked "current" week
+    // so it auto-lands on the right week each time the app opens).
+    const weeks = config.weeks || null;
+    let weekIndex = weeks ? Math.max(0, Math.min(weeks.length - 1, config.defaultWeekIndex || 0)) : 0;
+
     // sync sound settings
     if (window.Speak) window.Speak.toggle(store.data.settings.speak);
     if (window.SFX) window.SFX.toggle(store.data.settings.sound !== false);
@@ -130,6 +135,8 @@
         pointName: config.pointName,
         pointEmoji: config.pointEmoji,
         shuffle, sample, rand, pick, el, esc,
+        week: weeks ? weeks[weekIndex] : null,
+        weekIndex: weekIndex,
         _newCreature: null,
       };
       ctx.speak = (t, o) => window.Speak && window.Speak.say(t, o);
@@ -216,15 +223,22 @@
       const hero = el("div", "hero");
       const owned = store.data.creatures.length;
       const nextStars = (CREATURE_MILESTONES[owned] || (25 + owned * 8));
+      const curWeek = weeks ? weeks[weekIndex] : null;
+      const focusText = typeof config.focus === "function" ? config.focus(curWeek) : config.focus;
       hero.innerHTML =
         "<div class='hero-mascot'>" + (config.mascot || "🐠") + "</div>" +
         "<div class='hero-info'><div class='hero-hi'>" + esc(config.greeting || "Ready to dive in?") + "</div>" +
-        (config.focus ? "<div class='hero-focus'>" + esc(config.focus) + "</div>" : "") +
+        (focusText ? "<div class='hero-focus'>" + esc(focusText) + "</div>" : "") +
         "<div class='hero-stats'>" + config.pointEmoji + " " + store.data.points + " " + esc(config.pointName) +
         " &nbsp;·&nbsp; ⭐ " + store.data.stars +
         (owned < config.creatures.length ? " &nbsp;·&nbsp; next friend at ★" + nextStars : " &nbsp;·&nbsp; all friends! 🎉") +
         "</div></div>";
       root.appendChild(hero);
+      if (weeks) {
+        const pill = el("button", "week-pill", "📅 Week " + curWeek.n + "  ▸");
+        pill.onclick = showWeekPicker;
+        hero.querySelector(".hero-info").appendChild(pill);
+      }
 
       const groups = {};
       const order = ["reading", "writing", "spelling", "math"];
@@ -272,6 +286,23 @@
       };
       extra.append(speakTile, soundTile);
       root.appendChild(extra);
+    }
+
+    function showWeekPicker() {
+      onBack = goHome;
+      root.innerHTML = "";
+      const c = el("div", "card");
+      c.appendChild(el("h2", null, "📅 Pick a Week"));
+      c.appendChild(el("p", "lead", "Choose which week's words and story to play."));
+      weeks.forEach((w, i) => {
+        const title = (w.story && w.story.title) || (w.passage && w.passage.title) || "";
+        const b = el("button", "week-choice" + (i === weekIndex ? " current" : ""));
+        b.innerHTML = "<span class='wc-n'>Week " + w.n + (i === weekIndex ? " ✓" : "") + "</span>" +
+          "<span class='wc-sub'>Level " + esc(w.level) + (title ? " · " + esc(title) : "") + "</span>";
+        b.onclick = () => { weekIndex = i; goHome(); };
+        c.appendChild(b);
+      });
+      root.appendChild(c);
     }
 
     function showStars() {

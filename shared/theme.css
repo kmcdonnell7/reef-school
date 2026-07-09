@@ -135,6 +135,25 @@ html, body {
 .hero-hi { font-weight: 800; font-size: 1.15rem; color: var(--deep); }
 .hero-focus { font-size: .85rem; color: var(--sea); font-weight: 700; margin-top: 2px; }
 .hero-stats { font-size: .82rem; color: var(--sea2); font-weight: 800; margin-top: 6px; }
+.week-pill {
+  margin-top: 8px; cursor: pointer; border: none;
+  background: var(--deep2); color: #fff;
+  font-family: var(--font); font-weight: 800; font-size: .82rem;
+  padding: 6px 13px; border-radius: 999px; box-shadow: 0 3px 0 rgba(1,58,99,.3);
+}
+.week-pill:active { transform: translateY(2px); box-shadow: 0 1px 0 rgba(1,58,99,.3); }
+
+/* Week picker rows */
+.week-choice {
+  display: block; width: 100%; text-align: left; cursor: pointer;
+  border: 3px solid var(--foam); background: var(--white);
+  border-radius: 16px; padding: 13px 16px; margin: 10px 0;
+  font-family: var(--font); transition: transform .05s;
+}
+.week-choice:active { transform: scale(.98); }
+.week-choice.current { border-color: var(--kelp); background: #eafaf1; }
+.week-choice .wc-n { display: block; font-weight: 800; font-size: 1.1rem; color: var(--deep); }
+.week-choice .wc-sub { display: block; font-size: .85rem; color: var(--sea); font-weight: 700; margin-top: 2px; }
 
 /* Hub tiles */
 .tiles { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }

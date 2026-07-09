@@ -1,5 +1,5 @@
 /* Deep Dive service worker — offline cache. BUMP CACHE_VERSION to ship updates. */
-const CACHE_VERSION = "deepdive-v2";
+const CACHE_VERSION = "deepdive-v3";
 const ASSETS = [
   "index.html",
   "app.js",
