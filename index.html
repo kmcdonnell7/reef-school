@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+  <title>Reef School</title>
+  <meta name="theme-color" content="#013a63" />
+  <link rel="apple-touch-icon" href="tidepool/icons/icon-180.png" />
+  <link rel="stylesheet" href="shared/theme.css" />
+  <style>
+    .splash { text-align: center; padding-top: 8vh; }
+    .logo { font-size: 4.2rem; line-height: 1; }
+    .splash h1 { color: #fff; font-size: 2.4rem; margin: 8px 0 2px; text-shadow: 0 3px 0 rgba(1,58,99,.4); }
+    .splash .tag { color: #eaf6fb; font-weight: 700; margin-bottom: 22px; }
+    .players { display: grid; gap: 16px; max-width: 420px; margin: 0 auto; padding: 0 12px; }
+    .player {
+      cursor: pointer; text-decoration: none; border: none;
+      background: #fff; border-radius: 26px; padding: 22px 18px;
+      box-shadow: 0 8px 0 rgba(1,58,99,.25); display: flex; align-items: center; gap: 16px;
+      transition: transform .06s;
+    }
+    .player:active { transform: translateY(4px); }
+    .player .face { font-size: 3.2rem; }
+    .player .info { text-align: left; }
+    .player .info .who { display: block; font-weight: 800; font-size: 1.5rem; color: #013a63; }
+    .player .info .lvl { display: block; margin-top: 3px; color: #2a6f97; font-weight: 700; }
+    .player.dive { background: linear-gradient(150deg, #a9d6e5, #61a5c2); }
+    .player.pool { background: linear-gradient(150deg, #ffe3a3, #ffd166); }
+    footer { text-align: center; color: #eaf6fb; margin-top: 30px; font-size: .8rem; font-weight: 700; }
+  </style>
+</head>
+<body>
+  <div class="bubbles" id="bubbles"></div>
+  <div class="wrap splash">
+    <div class="logo">🐠🐚🐙</div>
+    <h1>Reef School</h1>
+    <div class="tag">Pick your player!</div>
+    <div class="players">
+      <a class="player pool" href="tidepool/index.html">
+        <span class="face">🌊</span>
+        <span class="info"><span class="who">Tide Pool</span><span class="lvl">Ready for 2nd Grade · 🫧 pearls</span></span>
+      </a>
+      <a class="player dive" href="deepdive/index.html">
+        <span class="face">🤿</span>
+        <span class="info"><span class="who">Deep Dive</span><span class="lvl">Ready for 4th Grade · 💎 gems</span></span>
+      </a>
+    </div>
+    <footer>Learn • Play • Collect sea friends 🐢</footer>
+  </div>
+  <script>
+    var b = document.getElementById("bubbles");
+    for (var i = 0; i < 14; i++) {
+      var el = document.createElement("i");
+      el.style.setProperty("--s", (10 + Math.random() * 30) + "px");
+      el.style.setProperty("--x", (Math.random() * 100) + "%");
+      el.style.setProperty("--d", (8 + Math.random() * 12) + "s");
+      el.style.setProperty("--delay", (Math.random() * 12) + "s");
+      b.appendChild(el);
+    }
+  </script>
+</body>
+</html>
