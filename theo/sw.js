@@ -1,5 +1,5 @@
 /* Reef Craft (Theo) service worker — offline cache. BUMP CACHE_VERSION to ship updates. */
-const CACHE_VERSION = "theo-v4";
+const CACHE_VERSION = "theo-v5";
 const ASSETS = [
   "index.html",
   "play.html",
@@ -20,7 +20,11 @@ const ASSETS = [
 ];
 
 self.addEventListener("install", (e) => {
-  e.waitUntil(caches.open(CACHE_VERSION).then((c) => c.addAll(ASSETS)).then(() => self.skipWaiting()));
+  e.waitUntil(
+    caches.open(CACHE_VERSION)
+      .then((c) => Promise.all(ASSETS.map((u) => fetch(u, { cache: "reload" }).then((r) => (r.ok ? c.put(u, r) : null)).catch(() => {}))))
+      .then(() => self.skipWaiting())
+  );
 });
 
 self.addEventListener("activate", (e) => {

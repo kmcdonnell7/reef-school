@@ -226,10 +226,10 @@
       const front = el("div", "flip-face flip-front", "<div class='word'>" + esc(it.word) + "</div>");
       const back = el("div", "flip-face flip-back", "<div class='meta'>" + esc(it.back || "") + "</div>");
       inner.append(front, back); flip.appendChild(inner);
-      flip.onclick = () => { flip.classList.toggle("open"); ctx.speak(flip.classList.contains("open") && it.back ? it.back : it.word); };
+      flip.onclick = () => { flip.classList.toggle("open"); ctx.sayNow(flip.classList.contains("open") && it.back ? it.back : it.word); };
       wrap.appendChild(flip);
       const say = el("button", "btn sun", "🔊 Say it");
-      say.onclick = () => ctx.speak(it.word);
+      say.onclick = () => ctx.sayNow(it.word);
       const got = el("button", "btn kelp", "Got it! +1");
       got.onclick = (ev) => { earned += 1; ctx.award(1, ev); ctx.correct(); i++; step(); };
       const row = el("div", "row"); row.append(say, got);
@@ -251,7 +251,7 @@
     card.appendChild(story);
     card.appendChild(el("p", "lead center", "Read it (tap 🔊 to hear it), then answer the questions."));
     const listen = el("button", "btn sun big", "🔊 Read it to me");
-    listen.onclick = () => ctx.speak(opts.title + ". " + opts.paragraphs.join(" "));
+    listen.onclick = () => ctx.sayNow(opts.title + ". " + opts.paragraphs.join(" "));
     const go = el("button", "btn big", "I'm ready — start questions ➜");
     go.onclick = () => {
       const items = opts.quiz.map((x) => Object.assign({ speak: true }, x));
@@ -284,7 +284,7 @@
       card.appendChild(progressDots(words.length, i));
       card.appendChild(el("p", "lead", "Listen, then build the word!"));
       const say = el("button", "btn sun", "🔊 Hear the word");
-      say.onclick = () => ctx.speak(word);
+      say.onclick = () => ctx.sayNow(word);
       card.appendChild(say);
       const slots = el("div", "bank");
       slots.style.minHeight = "56px";
@@ -403,7 +403,7 @@
       card.appendChild(progressDots(sents.length, i));
       card.appendChild(el("p", "lead", "Tap the words in the right order."));
       const listen = el("button", "btn sun", "🔊 Hear it");
-      listen.onclick = () => ctx.speak(sentence);
+      listen.onclick = () => ctx.sayNow(sentence);
       card.appendChild(listen);
       const line = el("div", "bank"); line.style.minHeight = "52px"; card.appendChild(line);
       const fb = el("div", "feedback"); card.appendChild(fb);
@@ -442,7 +442,7 @@
     card.appendChild(el("h2", null, opts.title || "✍️ Story Starter"));
     card.appendChild(el("p", "lead", prompt));
     const listen = el("button", "btn sun", "🔊 Hear it");
-    listen.onclick = () => ctx.speak(prompt);
+    listen.onclick = () => ctx.sayNow(prompt);
     card.appendChild(listen);
     card.appendChild(el("div", "spacer"));
 
@@ -464,7 +464,7 @@
     card.appendChild(ta);
     const fb = el("div", "feedback"); card.appendChild(fb);
     const readBack = el("button", "btn", "🔊 Read my writing");
-    readBack.onclick = () => ctx.speak(ta.value || "You haven't written anything yet.");
+    readBack.onclick = () => ctx.sayNow(ta.value || "You haven't written anything yet.");
     const save = el("button", "btn big kelp", "I finished! +3");
     save.onclick = (ev) => {
       if (ta.value.trim().split(/\s+/).filter(Boolean).length < 4) {
@@ -521,7 +521,7 @@
 
   G.wordProblems = function (ctx, opts) {
     const chosen = sample(opts.bank, Math.min(opts.count || 6, opts.bank.length));
-    const items = chosen.map((p) => ({ q: p.t, a: p.a, pre: (function () { const b = el("button", "btn sun"); b.textContent = "🔊 Read the problem"; b.onclick = () => ctx.speak(p.t); return b; })() }));
+    const items = chosen.map((p) => ({ q: p.t, a: p.a, pre: (function () { const b = el("button", "btn sun"); b.textContent = "🔊 Read the problem"; b.onclick = () => ctx.sayNow(p.t); return b; })() }));
     numQuiz(ctx, { gameId: opts.gameId, emoji: opts.emoji, items: items, pointsEach: 3 });
   };
 
@@ -550,7 +550,7 @@
     if (!items.length) { ctx.set(el("div", "card", "<h2>Fill-the-Gap</h2><p class='lead'>No sentences to fill this week — try another game!</p>")); return; }
     mcqQuiz(ctx, {
       gameId: opts.gameId, emoji: opts.emoji, pointsEach: 2, items: items, doneTitle: "Sentence solver! 📖",
-      header: (it) => { const b = el("button", "btn sun"); b.textContent = "🔊 Hear the sentence"; b.onclick = () => ctx.speak(it._spoken); return b; },
+      header: (it) => { const b = el("button", "btn sun"); b.textContent = "🔊 Hear the sentence"; b.onclick = () => ctx.sayNow(it._spoken); return b; },
     });
   };
 
@@ -635,11 +635,11 @@
         card.appendChild(el("p", "lead", "Read the word, then tap its picture!"));
         card.appendChild(el("div", "prompt-big", esc(target)));
         const hear = el("button", "btn sun", "🔊 Hear it");
-        hear.onclick = () => ctx.speak(target);
+        hear.onclick = () => ctx.sayNow(target);
         card.appendChild(hear);
       } else {
         const say = el("button", "btn sun big", "🔊 Find the word");
-        say.onclick = () => ctx.speak("Find the " + target);
+        say.onclick = () => ctx.sayNow("Find the " + target);
         card.appendChild(say);
       }
       const fb = el("div", "feedback"); card.appendChild(fb);
@@ -688,7 +688,7 @@
       card.appendChild(progressDots(words.length, i));
       card.appendChild(el("p", "lead", "Tap the first sound to build the word!"));
       const say = el("button", "btn sun", "🔊 Hear the word");
-      say.onclick = () => ctx.speak(word);
+      say.onclick = () => ctx.sayNow(word);
       card.appendChild(say);
       const wordBox = el("div", "prompt-big");
       wordBox.innerHTML = "<span style='color:var(--sun2)'>?</span>" + esc(fam.ending);

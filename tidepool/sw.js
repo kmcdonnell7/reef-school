@@ -1,5 +1,5 @@
 /* Tide Pool service worker — offline cache. BUMP CACHE_VERSION to ship updates. */
-const CACHE_VERSION = "tidepool-v5";
+const CACHE_VERSION = "tidepool-v6";
 const ASSETS = [
   "index.html",
   "app.js",
@@ -17,7 +17,11 @@ const ASSETS = [
 ];
 
 self.addEventListener("install", (e) => {
-  e.waitUntil(caches.open(CACHE_VERSION).then((c) => c.addAll(ASSETS)).then(() => self.skipWaiting()));
+  e.waitUntil(
+    caches.open(CACHE_VERSION)
+      .then((c) => Promise.all(ASSETS.map((u) => fetch(u, { cache: "reload" }).then((r) => (r.ok ? c.put(u, r) : null)).catch(() => {}))))
+      .then(() => self.skipWaiting())
+  );
 });
 
 self.addEventListener("activate", (e) => {

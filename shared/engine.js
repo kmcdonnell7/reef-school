@@ -42,8 +42,8 @@
     const CONE = config.creatureOne || "sea friend", CPL = config.creaturePlural || "sea friends";
     const CHART = config.chartTitle || "Star Chart";
 
-    // sync sound settings
-    if (window.Speak) window.Speak.toggle(store.data.settings.speak);
+    // sync sound settings (auto-read defaults OFF; manual "Say it" buttons always work)
+    if (window.Speak) window.Speak.setAuto(store.data.settings.autoRead === true);
     if (window.SFX) window.SFX.toggle(store.data.settings.sound !== false);
 
     // ---- root scaffolding ----
@@ -147,7 +147,8 @@
         weekIndex: weekIndex,
         _newCreature: null,
       };
-      ctx.speak = (t, o) => window.Speak && window.Speak.say(t, o);
+      ctx.speak = (t, o) => window.Speak && window.Speak.say(t, o);      // auto (gated by setting)
+      ctx.sayNow = (t, o) => window.Speak && window.Speak.force(t, o);   // manual buttons (always)
       ctx.award = (n, ev) => {
         store.addPoints(n);
         refreshScore();
@@ -271,18 +272,19 @@
       const extra = el("div", "tiles");
       extra.appendChild(tileEl("reef", SICON, CHART, store.data.stars + " " + SPL, showStars));
       extra.appendChild(tileEl("reef", "👪", "Grown-Ups", "progress", showGrown));
-      const speakTile = tileEl("reef", "🔊", "Read Aloud", "ON", null);
+      const speakTile = tileEl("reef", "🔊", "Read Aloud", "OFF", null);
       const renderSpeak = () => {
-        speakTile.querySelector(".badge").textContent = store.data.settings.speak ? "🔊" : "🔇";
-        speakTile.querySelector(".sub").textContent = store.data.settings.speak ? "ON" : "OFF";
+        const on = store.data.settings.autoRead === true;
+        speakTile.querySelector(".badge").textContent = on ? "🔊" : "🔇";
+        speakTile.querySelector(".sub").textContent = on ? "ON" : "OFF";
       };
       renderSpeak();
       speakTile.onclick = () => {
-        const on = !store.data.settings.speak;
-        store.setSpeak(on);
-        if (window.Speak) window.Speak.toggle(on);
+        const on = !(store.data.settings.autoRead === true);
+        store.setAutoRead(on);
+        if (window.Speak) window.Speak.setAuto(on);
         renderSpeak();
-        if (on) window.Speak && window.Speak.say("Read aloud is on");
+        if (on && window.Speak) window.Speak.force("Read aloud is on");
       };
       const soundTile = tileEl("reef", "🎵", "Sound FX", "ON", null);
       const renderSound = () => {
