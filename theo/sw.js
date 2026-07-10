@@ -1,5 +1,5 @@
 /* Reef Craft (Theo) service worker — offline cache. BUMP CACHE_VERSION to ship updates. */
-const CACHE_VERSION = "theo-v5";
+const CACHE_VERSION = "theo-v6";
 const ASSETS = [
   "index.html",
   "play.html",

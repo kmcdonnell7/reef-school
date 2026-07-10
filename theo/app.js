@@ -42,9 +42,8 @@
       build: (ctx) => G.soundBuild(ctx, { gameId: "sound-build", emoji: "⛏️", family: ctx.week.family, count: 3 }) },
     { id: "story-time", name: "Story Time", emoji: "📖", tag: "reading", sub: "Listen & answer",
       build: (ctx) => G.reading(ctx, { gameId: "story-time", emoji: "📖", title: ctx.week.story.title, genre: null, paragraphs: ctx.week.story.lines, quiz: ctx.week.story.quiz }) },
-    { id: "draw-tell", name: "Draw & Tell", emoji: "🎨", tag: "writing", sub: "Draw a picture",
-      build: (ctx) => G.journal(ctx, { gameId: "draw-tell", emoji: "🎨", title: "🎨 Draw & Tell", drawMode: true,
-        prompts: ["Draw your favorite animal!", "Draw something you love to do.", "Draw a Minecraft world!", "Draw your family.", "Draw the beach or a pool."] }) },
+    { id: "trace-it", name: "Trace It", emoji: "✏️", tag: "writing", sub: "Write the word",
+      build: (ctx) => G.traceWord(ctx, { gameId: "trace-it", emoji: "✏️", words: ctx.week.family.words, count: 3 }) },
   ];
 
   const readGames = [

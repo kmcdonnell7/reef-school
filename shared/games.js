@@ -725,6 +725,68 @@
     step();
   };
 
+  // Trace It — finger-trace the word over a guide (real on-screen writing)
+  G.traceWord = function (ctx, opts) {
+    const words = sample(opts.words, Math.min(opts.count || 3, opts.words.length));
+    let i = 0, score = 0;
+    function step() {
+      if (i >= words.length) { ctx.finish({ gameId: opts.gameId, emoji: opts.emoji, score: score, title: "Great writing! ✍️" }); return; }
+      const word = words[i];
+      const card = el("div", "card center");
+      card.appendChild(progressDots(words.length, i));
+      card.appendChild(el("p", "lead", "Trace the word with your finger!"));
+      const say = el("button", "btn sun", "🔊 Hear it");
+      say.onclick = () => ctx.sayNow(word);
+      card.appendChild(say);
+
+      const dpr = window.devicePixelRatio || 1;
+      const cw = Math.max(220, Math.min(360, window.innerWidth - 72));
+      const ch = 150;
+      const canvas = el("canvas");
+      canvas.style.cssText = "width:" + cw + "px;height:" + ch + "px;touch-action:none;background:var(--sand);border-radius:10px;display:block;margin:12px auto;border:3px solid var(--shallow)";
+      canvas.width = Math.round(cw * dpr); canvas.height = Math.round(ch * dpr);
+      const g = canvas.getContext("2d");
+      g.scale(dpr, dpr);
+      function drawGuide() {
+        g.clearRect(0, 0, cw, ch);
+        g.textBaseline = "middle"; g.textAlign = "center";
+        let fs = 96;
+        do { g.font = "800 " + fs + "px 'Baloo 2', 'Comic Sans MS', system-ui, sans-serif"; if (g.measureText(word).width <= cw - 30) break; fs -= 4; } while (fs > 22);
+        g.fillStyle = "rgba(1,58,99,0.16)";
+        g.fillText(word, cw / 2, ch / 2);
+      }
+      drawGuide();
+      card.appendChild(canvas);
+      const fb = el("div", "feedback"); card.appendChild(fb);
+
+      let drawing = false, last = null, len = 0, done = false;
+      const threshold = Math.max(320, word.length * 130);
+      function pos(e) { const r = canvas.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; }
+      canvas.addEventListener("pointerdown", (e) => { drawing = true; last = pos(e); try { canvas.setPointerCapture(e.pointerId); } catch (x) {} e.preventDefault(); });
+      canvas.addEventListener("pointermove", (e) => {
+        if (!drawing) return;
+        const p = pos(e);
+        g.strokeStyle = "#e0a600"; g.lineWidth = 11; g.lineCap = "round"; g.lineJoin = "round";
+        g.beginPath(); g.moveTo(last.x, last.y); g.lineTo(p.x, p.y); g.stroke();
+        len += Math.hypot(p.x - last.x, p.y - last.y); last = p;
+        if (!done && len >= threshold) { done = true; ready(); }
+        e.preventDefault();
+      });
+      canvas.addEventListener("pointerup", () => { drawing = false; });
+      canvas.addEventListener("pointercancel", () => { drawing = false; });
+
+      const clearBtn = el("button", "btn ghost", "↺ Clear");
+      const doneBtn = el("button", "btn big kelp", "Done ✓"); doneBtn.disabled = true;
+      clearBtn.onclick = () => { len = 0; done = false; drawGuide(); doneBtn.disabled = true; fb.textContent = ""; fb.className = "feedback"; };
+      doneBtn.onclick = (ev) => { score += 2; ctx.award(2, ev); ctx.correct(); ctx.confetti(); i++; step(); };
+      function ready() { doneBtn.disabled = false; ctx.feedback(fb, "Nice writing! Tap Done ✓", true); ctx.sayNow(word); }
+      const row = el("div", "row"); row.append(clearBtn, doneBtn);
+      card.appendChild(row);
+      ctx.set(card);
+    }
+    step();
+  };
+
   R.G = G;
   R.progressDots = progressDots;
   R.pickWeek = function (weeks, todayISO) {
