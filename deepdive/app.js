@@ -62,6 +62,7 @@
   window.Reef.start({
     title: "Deep Dive",
     playerKey: "deepdive",
+    homeUrl: "../index.html",
     pointName: "gems",
     pointEmoji: "💎",
     mascot: "🐬",

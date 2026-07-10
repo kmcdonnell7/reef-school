@@ -1,5 +1,5 @@
 /* Tide Pool service worker — offline cache. BUMP CACHE_VERSION to ship updates. */
-const CACHE_VERSION = "tidepool-v4";
+const CACHE_VERSION = "tidepool-v5";
 const ASSETS = [
   "index.html",
   "app.js",

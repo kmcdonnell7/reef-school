@@ -62,6 +62,7 @@
   window.Reef.start({
     title: "Tide Pool",
     playerKey: "tidepool",
+    homeUrl: "../index.html",
     pointName: "pearls",
     pointEmoji: "🫧",
     mascot: "🐠",

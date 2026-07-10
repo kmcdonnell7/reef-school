@@ -222,8 +222,13 @@
       return t;
     }
 
+    function backHub() {
+      // From the hub, the back button leaves to the parent landing page.
+      if (config.homeUrl) { if (window.Speak) window.Speak.stop(); window.location.href = config.homeUrl; }
+    }
+
     function goHome() {
-      onBack = goHome;
+      onBack = backHub;
       if (window.Speak) window.Speak.stop();
       root.innerHTML = "";
 

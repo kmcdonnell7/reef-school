@@ -74,6 +74,7 @@
   window.Reef.start({
     title: MODE === "read" ? "Word Explorer" : "Picture Play",
     playerKey: "theo",
+    homeUrl: "index.html",
     pointName: "emeralds",
     pointEmoji: "🟩",
     starOne: "diamond", starPlural: "diamonds", starEmoji: "💎", starMark: "💎",
