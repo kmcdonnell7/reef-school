@@ -30,8 +30,8 @@
 
   // ---- game rosters per mode ----
   const playGames = [
-    { id: "pic-match", name: "Picture Pop", emoji: "🖼️", tag: "reading", sub: "Tap the picture",
-      build: (ctx) => G.pictureMatch(ctx, { gameId: "pic-match", emoji: "🖼️", map: DATA.picMap, pool: picPool(ctx.week), count: 3, showText: false }) },
+    { id: "pic-match", name: "Word Match", emoji: "🖼️", tag: "reading", sub: "Read & find",
+      build: (ctx) => G.pictureMatch(ctx, { gameId: "pic-match", emoji: "🖼️", map: DATA.picMap, pool: picPool(ctx.week), count: 3, showText: true }) },
     { id: "sight-pop", name: "Word Blocks", emoji: "🟦", tag: "reading", sub: "Hear & read",
       build: (ctx) => G.flashcards(ctx, {
         gameId: "sight-pop", emoji: "🟦", count: 3,

@@ -630,10 +630,18 @@
       const choices = shuffle([target].concat(wrongs));
       const card = el("div", "card center");
       card.appendChild(progressDots(words.length, i));
-      const say = el("button", "btn sun big", "🔊 Find the word");
-      say.onclick = () => ctx.speak("Find the " + target);
-      card.appendChild(say);
-      if (opts.showText) card.appendChild(el("div", "prompt-big", esc(target)));
+      if (opts.showText) {
+        // Show the written word — he reads it and finds the matching picture.
+        card.appendChild(el("p", "lead", "Read the word, then tap its picture!"));
+        card.appendChild(el("div", "prompt-big", esc(target)));
+        const hear = el("button", "btn sun", "🔊 Hear it");
+        hear.onclick = () => ctx.speak(target);
+        card.appendChild(hear);
+      } else {
+        const say = el("button", "btn sun big", "🔊 Find the word");
+        say.onclick = () => ctx.speak("Find the " + target);
+        card.appendChild(say);
+      }
       const fb = el("div", "feedback"); card.appendChild(fb);
       const row = el("div", "tiles");
       let answered = false;
@@ -659,7 +667,7 @@
       });
       card.appendChild(row);
       ctx.set(card);
-      ctx.speak("Find the " + target);
+      if (!opts.showText) ctx.speak("Find the " + target);
     }
     step();
   };
