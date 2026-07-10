@@ -441,10 +441,24 @@
     const card = el("div", "card");
     card.appendChild(el("h2", null, opts.title || "✍️ Story Starter"));
     card.appendChild(el("p", "lead", prompt));
-    const listen = el("button", "btn sun", "🔊 Hear the prompt");
+    const listen = el("button", "btn sun", "🔊 Hear it");
     listen.onclick = () => ctx.speak(prompt);
     card.appendChild(listen);
     card.appendChild(el("div", "spacer"));
+
+    // Draw & Tell mode (pre-reader): no typing — draw on paper, then tap done.
+    if (opts.drawMode) {
+      card.appendChild(el("p", "lead center", "✏️ Draw a picture, then tell a grown-up about it!"));
+      const done = el("button", "btn big kelp", "I did it! 🎉");
+      done.onclick = (ev) => {
+        ctx.award(3, ev); ctx.correct(); ctx.confetti();
+        ctx.finish({ gameId: opts.gameId, emoji: opts.emoji, score: 3, title: "Great drawing! 🎨" });
+      };
+      card.appendChild(done);
+      ctx.set(card);
+      ctx.speak(prompt);
+      return;
+    }
     const ta = el("textarea", "answer-input");
     ta.placeholder = "Write here...";
     card.appendChild(ta);
@@ -601,6 +615,106 @@
       gameId: opts.gameId, emoji: opts.emoji, pointsEach: 2, items: items, doneTitle: "Fraction finder! 🔢",
       header: (it) => { const wv = el("div", "center"); wv.style.margin = "6px 0 12px"; wv.innerHTML = it._svg; return wv; },
     });
+  };
+
+  // Picture Match (pre-reader) — hear a word, tap the matching picture
+  G.pictureMatch = function (ctx, opts) {
+    const map = opts.map;
+    const pool = (opts.pool && opts.pool.filter((w) => map[w])) || Object.keys(map);
+    const words = sample(pool, Math.min(opts.count || 4, pool.length));
+    let i = 0, score = 0;
+    function step() {
+      if (i >= words.length) { ctx.finish({ gameId: opts.gameId, emoji: opts.emoji, score: score, title: "Great looking! 👀" }); return; }
+      const target = words[i];
+      const wrongs = sample(pool.filter((w) => w !== target), 2);
+      const choices = shuffle([target].concat(wrongs));
+      const card = el("div", "card center");
+      card.appendChild(progressDots(words.length, i));
+      const say = el("button", "btn sun big", "🔊 Find the word");
+      say.onclick = () => ctx.speak("Find the " + target);
+      card.appendChild(say);
+      if (opts.showText) card.appendChild(el("div", "prompt-big", esc(target)));
+      const fb = el("div", "feedback"); card.appendChild(fb);
+      const row = el("div", "tiles");
+      let answered = false;
+      choices.forEach((w) => {
+        const b = el("button", "tile tile-reading");
+        b.innerHTML = "<span class='badge' style='font-size:2.6rem;width:76px;height:76px'>" + map[w] + "</span>";
+        b.onclick = (ev) => {
+          if (answered) return;
+          if (w === target) {
+            answered = true;
+            b.style.outline = "4px solid var(--kelp)";
+            score += 2; ctx.award(2, ev); ctx.correct();
+            ctx.feedback(fb, "Yes! That's “" + target + "”!", true);
+            ctx.speak("Yes! " + target);
+            setTimeout(() => { i++; step(); }, 950);
+          } else {
+            ctx.wrong();
+            ctx.feedback(fb, "Try again!", false);
+            ctx.speak("Try again");
+          }
+        };
+        row.appendChild(b);
+      });
+      card.appendChild(row);
+      ctx.set(card);
+      ctx.speak("Find the " + target);
+    }
+    step();
+  };
+
+  // Sound Build (phonics) — hear a word family word, tap the first sound to build it
+  G.soundBuild = function (ctx, opts) {
+    const fam = opts.family;
+    // only single-letter onsets so choices are single sounds
+    const buildable = fam.words.filter((w) => w.length === fam.ending.length + 1);
+    const words = sample(buildable.length ? buildable : fam.words, Math.min(opts.count || 4, (buildable.length || fam.words.length)));
+    const CONS = "bcdfghjklmnprstvw".split("");
+    let i = 0, score = 0;
+    function step() {
+      if (i >= words.length) { ctx.finish({ gameId: opts.gameId, emoji: opts.emoji, score: score, title: "Word builder! 🔤" }); return; }
+      const word = words[i];
+      const onset = word.slice(0, word.length - fam.ending.length);
+      const card = el("div", "card center");
+      card.appendChild(progressDots(words.length, i));
+      card.appendChild(el("p", "lead", "Tap the first sound to build the word!"));
+      const say = el("button", "btn sun", "🔊 Hear the word");
+      say.onclick = () => ctx.speak(word);
+      card.appendChild(say);
+      const wordBox = el("div", "prompt-big");
+      wordBox.innerHTML = "<span style='color:var(--sun2)'>?</span>" + esc(fam.ending);
+      card.appendChild(wordBox);
+      const fb = el("div", "feedback"); card.appendChild(fb);
+      const wrongs = sample(CONS.filter((c) => c !== onset), 2);
+      const choices = shuffle([onset].concat(wrongs));
+      const row = el("div", "bank");
+      let answered = false;
+      choices.forEach((c) => {
+        const b = el("button", "chip", esc(c));
+        b.style.fontSize = "1.6rem";
+        b.onclick = (ev) => {
+          if (answered) return;
+          if (c === onset) {
+            answered = true;
+            wordBox.innerHTML = "<span style='color:var(--kelp2)'>" + esc(onset) + "</span>" + esc(fam.ending);
+            score += 2; ctx.award(2, ev); ctx.correct();
+            ctx.feedback(fb, "“" + word + "” — you built it!", true);
+            ctx.speak("Yes! " + word);
+            setTimeout(() => { i++; step(); }, 1000);
+          } else {
+            ctx.wrong();
+            ctx.feedback(fb, "Not that sound — try again!", false);
+            ctx.speak("Try again");
+          }
+        };
+        row.appendChild(b);
+      });
+      card.appendChild(row);
+      ctx.set(card);
+      ctx.speak(word);
+    }
+    step();
   };
 
   R.G = G;

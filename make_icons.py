@@ -83,6 +83,34 @@ def make(app, cfg):
         print("wrote", os.path.join(app, "icons", f"icon-{size}.png"))
 
 
+def make_creeper(app):
+    """Pixel creeper face on a green block — Theo's Minecraft-themed icon."""
+    outdir = os.path.join(os.path.dirname(__file__), app, "icons")
+    os.makedirs(outdir, exist_ok=True)
+    dark = [(1,1),(2,1),(5,1),(6,1),(1,2),(2,2),(5,2),(6,2),(3,3),(4,3),
+            (2,4),(3,4),(4,4),(5,4),(2,5),(3,5),(4,5),(5,5),(2,6),(5,6)]
+    tex = {(0,0):(108,184,74),(7,2):(78,148,51),(0,5):(78,148,51),(7,6):(108,184,74),
+           (6,4):(78,148,51),(1,7):(108,184,74),(7,0):(78,148,51),(3,7):(78,148,51)}
+    base = (90, 168, 60)
+    for size in SIZES:
+        img = Image.new("RGBA", (size, size), (0, 0, 0, 0))
+        d = ImageDraw.Draw(img)
+        cell = size / 8.0
+        for gx in range(8):
+            for gy in range(8):
+                color = tex.get((gx, gy), base)
+                if (gx, gy) in dark:
+                    color = (47, 59, 31)
+                x0, y0 = gx * cell, gy * cell
+                d.rectangle([x0, y0, x0 + cell + 1, y0 + cell + 1], fill=color + (255,))
+        mask = Image.new("L", (size, size), 0)
+        ImageDraw.Draw(mask).rounded_rectangle([0, 0, size, size], radius=int(size * 0.14), fill=255)
+        img.putalpha(mask)
+        img.save(os.path.join(outdir, f"icon-{size}.png"))
+        print("wrote", os.path.join(app, "icons", f"icon-{size}.png"))
+
+
 if __name__ == "__main__":
     for app, cfg in APPS.items():
         make(app, cfg)
+    make_creeper("theo")

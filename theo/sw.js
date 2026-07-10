@@ -1,19 +1,22 @@
-/* Deep Dive service worker — offline cache. BUMP CACHE_VERSION to ship updates. */
-const CACHE_VERSION = "deepdive-v4";
+/* Reef Craft (Theo) service worker — offline cache. BUMP CACHE_VERSION to ship updates. */
+const CACHE_VERSION = "theo-v1";
 const ASSETS = [
   "index.html",
+  "play.html",
+  "read.html",
   "app.js",
   "manifest.webmanifest",
   "icons/icon-180.png",
   "icons/icon-192.png",
   "icons/icon-512.png",
   "../shared/theme.css",
+  "../shared/theme-mc.css",
   "../shared/speak.js",
   "../shared/sound.js",
   "../shared/store.js",
   "../shared/engine.js",
   "../shared/games.js",
-  "../shared/data/g4.js",
+  "../shared/data/g1.js",
 ];
 
 self.addEventListener("install", (e) => {

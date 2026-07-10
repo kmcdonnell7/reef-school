@@ -10,6 +10,8 @@
     if (html != null) n.innerHTML = html;
     return n;
   }
+  function cap(s) { s = String(s); return s.charAt(0).toUpperCase() + s.slice(1); }
+  function plur(n, one, many) { return n + " " + (n === 1 ? one : many); }
   function rand(n) { return Math.floor(Math.random() * n); }
   function pick(arr) { return arr[rand(arr.length)]; }
   function shuffle(arr) {
@@ -33,6 +35,12 @@
     // so it auto-lands on the right week each time the app opens).
     const weeks = config.weeks || null;
     let weekIndex = weeks ? Math.max(0, Math.min(weeks.length - 1, config.defaultWeekIndex || 0)) : 0;
+
+    // Reskinnable reward vocabulary (defaults keep the sea-friends wording).
+    const SICON = config.starEmoji || "⭐", SMARK = config.starMark || "★";
+    const SONE = config.starOne || "star", SPL = config.starPlural || "stars";
+    const CONE = config.creatureOne || "sea friend", CPL = config.creaturePlural || "sea friends";
+    const CHART = config.chartTitle || "Star Chart";
 
     // sync sound settings
     if (window.Speak) window.Speak.toggle(store.data.settings.speak);
@@ -175,8 +183,8 @@
       const emoji = ctx._newCreature || opts.emoji || "🌟";
       wrapC.appendChild(el("span", "big-emoji", emoji));
       if (ctx._newCreature) {
-        wrapC.appendChild(el("h2", null, "New sea friend unlocked!"));
-        wrapC.appendChild(el("p", "lead", "You collected a new creature for your reef!"));
+        wrapC.appendChild(el("h2", null, "New " + esc(CONE) + " unlocked!"));
+        wrapC.appendChild(el("p", "lead", "You collected a new " + esc(CONE) + "!"));
       } else {
         wrapC.appendChild(el("h2", null, opts.title || "Great job!"));
         if (opts.msg) wrapC.appendChild(el("p", "lead", opts.msg));
@@ -192,7 +200,7 @@
       wrapC.append(again, home);
       root.innerHTML = "";
       root.appendChild(wrapC);
-      if (window.Speak) window.Speak.say(ctx._newCreature ? "You unlocked a new sea friend!" : "Great job!");
+      if (window.Speak) window.Speak.say(ctx._newCreature ? "You unlocked a new " + CONE + "!" : "Great job!");
     }
 
     // ---------- open a game ----------
@@ -230,8 +238,8 @@
         "<div class='hero-info'><div class='hero-hi'>" + esc(config.greeting || "Ready to dive in?") + "</div>" +
         (focusText ? "<div class='hero-focus'>" + esc(focusText) + "</div>" : "") +
         "<div class='hero-stats'>" + config.pointEmoji + " " + store.data.points + " " + esc(config.pointName) +
-        " &nbsp;·&nbsp; ⭐ " + store.data.stars +
-        (owned < config.creatures.length ? " &nbsp;·&nbsp; next friend at ★" + nextStars : " &nbsp;·&nbsp; all friends! 🎉") +
+        " &nbsp;·&nbsp; " + SICON + " " + store.data.stars +
+        (owned < config.creatures.length ? " &nbsp;·&nbsp; next " + esc(CONE) + " at " + SMARK + nextStars : " &nbsp;·&nbsp; all " + esc(CPL) + "! 🎉") +
         "</div></div>";
       root.appendChild(hero);
       if (weeks) {
@@ -256,7 +264,7 @@
       // My Reef row
       root.appendChild(el("div", "section-label", "🏝️ My Reef"));
       const extra = el("div", "tiles");
-      extra.appendChild(tileEl("reef", "⭐", "Star Chart", store.data.stars + " stars", showStars));
+      extra.appendChild(tileEl("reef", SICON, CHART, store.data.stars + " " + SPL, showStars));
       extra.appendChild(tileEl("reef", "👪", "Grown-Ups", "progress", showGrown));
       const speakTile = tileEl("reef", "🔊", "Read Aloud", "ON", null);
       const renderSpeak = () => {
@@ -309,11 +317,11 @@
       onBack = goHome;
       root.innerHTML = "";
       const c = el("div", "card");
-      c.appendChild(el("h2", null, "⭐ Star Chart"));
-      c.appendChild(el("p", "lead", "Earn a star for every 10 " + config.pointEmoji + "!"));
-      c.appendChild(el("div", "prompt-med", "★ " + store.data.stars + " stars"));
+      c.appendChild(el("h2", null, SICON + " " + CHART));
+      c.appendChild(el("p", "lead", "Earn 1 " + SONE + " for every 10 " + config.pointEmoji + "!"));
+      c.appendChild(el("div", "prompt-med", SMARK + " " + plur(store.data.stars, SONE, SPL)));
       c.appendChild(el("div", "muted center", store.data.points + " " + config.pointName + " so far"));
-      const shelfLbl = el("div", "section-label", "🐚 Your sea friends");
+      const shelfLbl = el("div", "section-label", (config.creatureIcon || "🐚") + " Your " + CPL);
       const shelf = el("div", "shelf");
       config.creatures.forEach((cr, i) => {
         const owned = store.data.creatures.includes(cr);
@@ -326,7 +334,7 @@
       const next = store.data.creatures.length;
       if (next < config.creatures.length) {
         const need = CREATURE_MILESTONES[next] || (25 + next * 8);
-        wrap2.appendChild(el("div", "muted center", "Next friend at ★ " + need + " stars"));
+        wrap2.appendChild(el("div", "muted center", "Next " + CONE + " at " + SMARK + " " + plur(need, SONE, SPL)));
       } else {
         wrap2.appendChild(el("div", "muted center", "You collected them all! 🎉"));
       }
@@ -342,9 +350,9 @@
       const d = store.data;
       const acc = d.answered ? Math.round((d.correct / d.answered) * 100) : 0;
       const rows = [
-        [config.pointName + " earned", d.points + " " + config.pointEmoji],
-        ["Stars", d.stars + " ★"],
-        ["Sea friends", d.creatures.length + " / " + config.creatures.length],
+        [cap(config.pointName) + " earned", d.points + " " + config.pointEmoji],
+        [cap(SPL), d.stars + " " + SMARK],
+        [cap(CPL), d.creatures.length + " / " + config.creatures.length],
         ["Questions answered", d.answered],
         ["Answered correctly", d.correct + " (" + acc + "%)"],
       ];

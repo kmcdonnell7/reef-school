@@ -1,0 +1,106 @@
+/* Reef School — Minecraft ocean-biome skin. Loaded AFTER theme.css, Theo's app only.
+   Blocky panels, hard pixel shadows, a Minecraft palette. */
+:root {
+  --deep: #0b3a5b; --deep2: #123f63; --sea: #21567a; --sea2: #2f6d8f;
+  --shallow: #3a7ca5; --foam: #7fc7d9; --sand: #e7dcc0;
+  --coral: #c0392b; --coral2: #d3692f;
+  --sun: #ffd23f; --sun2: #e0a600;
+  --kelp: #57a63f; --kelp2: #2f6d28;
+  --grape: #7b52c9; --ink: #1c2a33; --white: #efeadb;
+  --radius: 6px;
+  --shadow: 0 6px 0 rgba(0,0,0,.32);
+  --pxborder: 4px solid #1c2a33;
+}
+
+/* Blocky water background with a subtle 32px grid (fake block edges) */
+body {
+  background:
+    repeating-linear-gradient(0deg, rgba(255,255,255,.035) 0 31px, rgba(0,0,0,.05) 31px 32px),
+    repeating-linear-gradient(90deg, rgba(255,255,255,.035) 0 31px, rgba(0,0,0,.05) 31px 32px),
+    linear-gradient(180deg, #3a7ca5 0%, #21567a 55%, #0b2f4c 100%);
+  background-attachment: fixed;
+  color: #21313c;
+}
+
+/* Chunky, label-like headings & buttons */
+.topbar h1, .btn, .week-pill, .tile .name, .card h2, .choice {
+  letter-spacing: .5px;
+}
+.topbar h1 { text-transform: uppercase; letter-spacing: 2px; }
+
+/* Panels look like carved blocks */
+.card, .hero {
+  border-radius: var(--radius);
+  border: var(--pxborder);
+  box-shadow: var(--shadow);
+}
+.card { background: #efe8d6; }
+.card h2 { color: #2f6d28; text-transform: uppercase; letter-spacing: 1px; }
+
+/* Hero = grass-on-dirt block */
+.hero {
+  background: linear-gradient(180deg, #63b23d 0 42%, #8a6239 42% 100%);
+  color: #fff;
+}
+.hero-hi, .hero-focus, .hero-stats { color: #fff; text-shadow: 1px 1px 0 rgba(0,0,0,.45); }
+.hero-mascot { filter: drop-shadow(2px 3px 0 rgba(0,0,0,.35)); }
+.hero-mascot svg { display: block; width: 62px; height: 62px; }
+
+/* Buttons = beveled blocks */
+.btn, .btn-back, .week-pill, .score-chip {
+  border-radius: 4px;
+  border: 3px solid rgba(0,0,0,.4);
+  box-shadow: 0 6px 0 rgba(0,0,0,.32), inset 0 2px 0 rgba(255,255,255,.22);
+}
+.btn { text-transform: uppercase; }
+.btn:active, .week-pill:active { box-shadow: 0 2px 0 rgba(0,0,0,.32), inset 0 2px 0 rgba(255,255,255,.22); }
+.score-chip { background: #efe8d6; color: #21313c; box-shadow: 0 4px 0 rgba(0,0,0,.3); }
+.btn-back { background: #8a8a8a; color: #fff; }
+
+/* Tiles = inventory slots / blocks */
+.tile {
+  border-radius: 4px; overflow: visible;
+  border: 4px solid rgba(0,0,0,.4);
+  box-shadow: 0 6px 0 rgba(0,0,0,.3);
+}
+.tile::after { display: none; }
+.tile .badge {
+  border-radius: 4px; background: rgba(255,255,255,.9);
+  box-shadow: inset 0 0 0 3px rgba(0,0,0,.14);
+}
+.tile .name { text-transform: uppercase; letter-spacing: .5px; }
+.tile-reading  { background: linear-gradient(180deg, #3f8fb8, #21567a); }   /* water */
+.tile-writing  { background: linear-gradient(180deg, #a9702f, #7a4f22); }   /* oak/dirt */
+.tile-spelling { background: linear-gradient(180deg, #3fb85f, #237a3a); }   /* emerald */
+.tile-math     { background: linear-gradient(180deg, #9a5bd6, #6a3aa8); }
+.tile-reef     { background: linear-gradient(180deg, #9a9a9a, #6f6f6f); color: #fff; } /* stone */
+.tile-reef .name { text-shadow: 1px 1px 0 rgba(0,0,0,.4); }
+.tile-reef .sub { opacity: .9; }
+
+/* Choices & chips = blocks */
+.choice { border-radius: 4px; border: 3px solid rgba(0,0,0,.25); }
+.choice.correct { border-color: var(--kelp2); }
+.chip { border-radius: 4px; box-shadow: 0 4px 0 rgba(0,0,0,.28); }
+
+/* Answer / story surfaces */
+.answer-input { border-radius: 4px; border: 3px solid var(--sea); }
+.story { border-radius: 5px; border: 3px solid #cdbf98; }
+.flip-face { border-radius: 5px; }
+
+/* Sea floor = sand/stone blocks */
+.seafloor { height: 66px; }
+.seafloor svg { display: none; }
+.seafloor::before {
+  content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 46px;
+  background:
+    repeating-linear-gradient(90deg, #d8c88f 0 30px, #cbb97b 30px 32px, #ddce97 32px 62px, #cbb97b 62px 64px);
+  border-top: 4px solid #a98f5e;
+}
+.seafloor .weed { bottom: 44px; }
+
+/* Progress dots = little blocks */
+.progress i { border-radius: 3px; }
+.progress i.done { background: var(--kelp); }
+
+/* Reward pop */
+.reward .big-emoji { filter: drop-shadow(2px 3px 0 rgba(0,0,0,.3)); }
